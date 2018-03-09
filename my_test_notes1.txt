@@ -1,0 +1,365 @@
+from collections import namedtuple
+
+import records
+
+#from pytest import raises
+
+
+IdRecord = namedtuple('IdRecord', 'id')
+
+
+def check_id(i, row):
+    assert row.id == i
+
+print('------------------------1-----------------------------------')
+class TestRecordCollection:
+    def test_iter(self):
+        rows = records.RecordCollection(IdRecord(i) for i in range(10))
+        for i, row in enumerate(rows):
+            check_id(i, row)
+        return rows
+
+t = TestRecordCollection()
+rows = t.test_iter()
+print('len(rows): ', len(rows))
+
+print('-------------------------2----------------------------------')
+
+class TestRecordCollection2:
+    def test_iter(self):
+        rows = records.RecordCollection(IdRecord(i) for i in range(10))
+        return rows
+
+t2 = TestRecordCollection2()
+rows2 = t2.test_iter()
+print('rows2[3]', rows2[3])
+
+
+print('------------------------3-----------------------------------')
+
+class TestRecordCollection3:
+    def test_iter(self):
+        rows = records.RecordCollection(IdRecord(i) for i in range(10))
+        return rows
+
+t3 = TestRecordCollection3()
+rows3 = t3.test_iter()
+print(rows3.next())
+print(rows3.next())
+
+
+
+
+print('-------------------------4----------------------------------')
+
+class TestRecordCollection4:
+    def test_iter(self):
+        rows = records.RecordCollection(IdRecord(i) for i in range(10))
+        return rows
+
+t4 = TestRecordCollection4()
+rows4 = t4.test_iter()
+print(next(rows4))
+print(next(rows4))
+print(next(rows4))
+
+
+print('---------------------------5--------------------------------')
+
+class TestRecordCollection5:
+    def test_iter(self):
+        rows = records.RecordCollection(records.Record([str(i)], [i]) for i in range(10))
+        return rows
+
+t5 = TestRecordCollection5()
+rows5 = t5.test_iter()
+rows5.as_dict()
+
+print('--------------------------6---------------------------------')
+
+class TestRecordCollection6:
+    def test_slice_iter(self):
+        rows = records.RecordCollection(IdRecord(i) for i in range(10))
+        for i, row in enumerate(rows[:5]):
+            print('i: ', i)
+            check_id(i, row)
+        print('\n------\n')
+        for i, row in enumerate(rows):
+            check_id(i, row)
+            print('i: ', i)
+
+t6 = TestRecordCollection6()
+t6.test_slice_iter()
+
+
+
+print('--------------------------7---------------------------------')
+
+class TestRecordCollection7:
+    def test_first_returns_a_single_record(self):
+        rows = records.RecordCollection(IdRecord(i) for i in range(1))
+        assert rows.first() == IdRecord(0)
+
+    def test_first_defaults_to_None(self):
+        rows = records.RecordCollection(iter([]))
+        assert rows.first() is None
+
+    def test_first_default_is_overridable(self):
+        rows = records.RecordCollection(iter([]))
+        assert rows.first('Cheese') == 'Cheese'
+
+t7 = TestRecordCollection7()
+t7.test_first_returns_a_single_record()
+print('-------')
+t7.test_first_defaults_to_None()
+print('-------')
+t7.test_first_default_is_overridable()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+zx@scsa-computer:~/python/git-hub/basic/records2/records$
+zx@scsa-computer:~/python/git-hub/basic/records2/records$
+zx@scsa-computer:~/python/git-hub/basic/records2/records$ python3 test_records.py
+------------------------1-----------------------------------
+RecordCollection: __init__
+RecordCollection: __iter__
+RecordCollection: __iter__, i:  0 len:  0
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  1 len:  1
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  2 len:  2
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  3 len:  3
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  4 len:  4
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  5 len:  5
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  6 len:  6
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  7 len:  7
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  8 len:  8
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  9 len:  9
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: __iter__, i:  10 len:  10
+RecordCollection: __iter__ try
+RecordCollection: __next__
+len(rows):  10
+-------------------------2----------------------------------
+RecordCollection: __init__
+RecordCollection: __getitem__
+RecordCollection: __getitem__, len(self):  0 key.stop:  4
+RecordCollection: __next__
+RecordCollection: __getitem__, len(self):  1 key.stop:  4
+RecordCollection: __next__
+RecordCollection: __getitem__, len(self):  2 key.stop:  4
+RecordCollection: __next__
+RecordCollection: __getitem__, len(self):  3 key.stop:  4
+RecordCollection: __next__
+rows2[3] IdRecord(id=3)
+------------------------3-----------------------------------
+RecordCollection: __init__
+RecordCollection: next!!!!!!!!!!!!!!!!!!!!!!!!!!!
+RecordCollection: __next__
+IdRecord(id=0)
+RecordCollection: next!!!!!!!!!!!!!!!!!!!!!!!!!!!
+RecordCollection: __next__
+IdRecord(id=1)
+-------------------------4----------------------------------
+RecordCollection: __init__
+RecordCollection: __next__
+IdRecord(id=0)
+RecordCollection: __next__
+IdRecord(id=1)
+RecordCollection: __next__
+IdRecord(id=2)
+---------------------------5--------------------------------
+RecordCollection: __init__
+RecordCollection: all list 1
+RecordCollection: __iter__
+RecordCollection: __iter__, i:  0 len:  0
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  1 len:  1
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  2 len:  2
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  3 len:  3
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  4 len:  4
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  5 len:  5
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  6 len:  6
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  7 len:  7
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  8 len:  8
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  9 len:  9
+RecordCollection: __iter__ try
+RecordCollection: __next__
+Record: __init__
+RecordCollection: __iter__, i:  10 len:  10
+RecordCollection: __iter__ try
+RecordCollection: __next__
+RecordCollection: all list 2
+--------------------------6---------------------------------
+RecordCollection: __init__
+RecordCollection: __getitem__
+RecordCollection: __getitem__, len(self):  0 key.stop:  5
+RecordCollection: __next__
+RecordCollection: __getitem__, len(self):  1 key.stop:  5
+RecordCollection: __next__
+RecordCollection: __getitem__, len(self):  2 key.stop:  5
+RecordCollection: __next__
+RecordCollection: __getitem__, len(self):  3 key.stop:  5
+RecordCollection: __next__
+RecordCollection: __getitem__, len(self):  4 key.stop:  5
+RecordCollection: __next__
+RecordCollection: __init__
+RecordCollection: __iter__
+RecordCollection: __iter__, i:  0 len:  0
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  0
+RecordCollection: __iter__, i:  1 len:  1
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  1
+RecordCollection: __iter__, i:  2 len:  2
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  2
+RecordCollection: __iter__, i:  3 len:  3
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  3
+RecordCollection: __iter__, i:  4 len:  4
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  4
+RecordCollection: __iter__, i:  5 len:  5
+RecordCollection: __iter__ try
+RecordCollection: __next__
+
+------
+
+RecordCollection: __iter__
+RecordCollection: __iter__, i:  0 len:  5
+!!!!!!RecordCollection: __iter__, i:  0
+RecordCollection: __getitem__
+i:  0
+RecordCollection: __iter__, i:  1 len:  5
+!!!!!!RecordCollection: __iter__, i:  1
+RecordCollection: __getitem__
+i:  1
+RecordCollection: __iter__, i:  2 len:  5
+!!!!!!RecordCollection: __iter__, i:  2
+RecordCollection: __getitem__
+i:  2
+RecordCollection: __iter__, i:  3 len:  5
+!!!!!!RecordCollection: __iter__, i:  3
+RecordCollection: __getitem__
+i:  3
+RecordCollection: __iter__, i:  4 len:  5
+!!!!!!RecordCollection: __iter__, i:  4
+RecordCollection: __getitem__
+i:  4
+RecordCollection: __iter__, i:  5 len:  5
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  5
+RecordCollection: __iter__, i:  6 len:  6
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  6
+RecordCollection: __iter__, i:  7 len:  7
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  7
+RecordCollection: __iter__, i:  8 len:  8
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  8
+RecordCollection: __iter__, i:  9 len:  9
+RecordCollection: __iter__ try
+RecordCollection: __next__
+i:  9
+RecordCollection: __iter__, i:  10 len:  10
+RecordCollection: __iter__ try
+RecordCollection: __next__
+--------------------------7---------------------------------
+RecordCollection: __init__
+RecordCollection: __getitem__
+RecordCollection: __getitem__, len(self):  0 key.stop:  1
+RecordCollection: __next__
+RecordCollection: __getitem__
+RecordCollection: __getitem__, len(self):  1 key.stop:  2
+RecordCollection: __next__
+RecordCollection: first IndexError 2
+-------
+RecordCollection: __init__
+RecordCollection: __getitem__
+RecordCollection: __getitem__, len(self):  0 key.stop:  1
+RecordCollection: __next__
+RecordCollection: first IndexError 1
+-------
+RecordCollection: __init__
+RecordCollection: __getitem__
+RecordCollection: __getitem__, len(self):  0 key.stop:  1
+RecordCollection: __next__
+RecordCollection: first IndexError 1
+zx@scsa-computer:~/python/git-hub/basic/records2/records$
+zx@scsa-computer:~/python/git-hub/basic/records2/records$
+zx@scsa-computer:~/python/git-hub/basic/records2/records$
+
+
+
+
+
+
