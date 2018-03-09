@@ -1,0 +1,175 @@
+【records】
+self._rows is a generator
+
+enumrate /
+list(self)	->  	__iter__   -> [i] -> __getitem__ -> python.next(iterator) ->  __next__ -> _all_rows
+							  |
+							  |-> python.next(iterator) ->  __next__ -> _all_rows
+
+
+							  
+							  
+self[idx]		->	__getitem__	-> python.next(iterator) ->  __next__ -> _all_rows
+__iter__ 已经展开部分	->  self[idx]		->	__getitem__	-> self._all_rows[key]
+
+
+
+
+RC.next()	-> next ->  __next__ -> _all_rows	只有此种方式能够调用到自己实现的 next()
+
+
+
+
+next(RC)	->  __next__ -> _all_rows
+
+
+
+		  
+		  [i]   __getitem__
+		  .		__getattr__
+		  
+		  
+	
+raise 是python的关键字，是用来抛出异常用的	
+raises 是函数 位于 /usr/lib/python2.7/_pytest/python_api.python
+def raises(expected_exception, *args, **kwargs)
+函数的意思是执行代码块或者函数，如果有期望的异常或者异常集合tuple，那么捕获该异常；
+否则任由抛出该异常
+
+*args, **kwargs用于定义代码块或者函数，以及需要的入参。
+
+例如
+raises(ValueError, rows.first)
+这个含义是执行rows.first，不带参数，如果执行时抛出ValueError，则捕获该异常，不抛出
+
+如果没有抛出这个异常，会报出DID NOT RAISE。。。。
+
+rows.first内部实现时，个数为0会抛出指定的异常，超过1则会抛出 ValueError
+
+如果rows.first没抛出异常，return了，那么没有抛出异常，所以会报出DID NOT RAISE。。。。
+
+！！！
+raises(ValueError, rows.first, IndexError)   rows.first(IndexError) 指定了default的值是 IndexError，执行first函数，然后看看是否抛出 ValueError
+
+（0）raises(IndexError, rows.first)
+如果range(1), rows.first正常执行，没有抛出异常，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.IndexError'>
+如果range(0), rows.first捕获IndexError，此时default是None，不是异常类型，于是返回None，不会抛出指定的IndexError，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.IndexError'>
+如果range(>1), rows.first抛出ValueError，这与指定的IndexError不相符合，所以ValueError不会被捕获，直接抛出，结果报出ValueError：RecordCollection contains too many rows
+
+（1）raises(ValueError, rows.first)
+如果range(1), rows.first正常执行，没有抛出异常，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.ValueError'>
+如果range(0), rows.first捕获指定的IndexError后，此时default是None，不是异常类型，于是返回None，不会抛出指定的ValueError，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.ValueError'>
+如果range(>1), rows.first抛出ValueError，这与指定的ValueError相符合，那么会被raises内部捕获，整个流程结果不会有异常
+
+
+（2）raises(ValueError, rows.first, ValueError)
+
+如果range(1), rows.first正常执行，没有抛出异常，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.ValueError'>
+如果range(>1 || 0), rows.first抛出ValueError，那么会被raises内部捕获，整个流程结果不会有异常
+
+（3）raises(IndexError, rows.first, IndexError)
+如果range(1), rows.first正常执行，没有抛出异常，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.IndexError'>
+如果range(0), rows.first捕获指定的IndexError后，抛出指定的IndexError，那么会被raises内部捕获，因为指定了IndexError，整个流程结果不会有异常
+如果range(>1), rows.first抛出ValueError，这与指定的IndexError不相符合，所以ValueError不会被捕获，直接抛出，结果报出ValueError：RecordCollection contains too many rows
+
+（4）raises(ValueError, rows.first, IndexError)
+如果range(1), rows.first正常执行，没有抛出异常，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.ValueError'>
+如果range(0), rows.first捕获指定的IndexError后，抛出指定的IndexError，这与指定的ValueError不相符合，所以IndexError不会被捕获，直接抛出，结果报出IndexError
+如果range(>1), rows.first抛出ValueError，这与指定的ValueError相符合，会被raises内部捕获，整个流程结果不会有异常
+
+（5）raises(IndexError, rows.first, ValueError)
+如果range(1), rows.first正常执行，没有抛出异常，那么会报出 buildins.Failed: DID NOT RAISE <TYPE 'EXCEPTIONS.IndexError'>
+如果range(0), rows.first捕获指定的IndexError后，抛出指定的ValueError，这与指定的IndexError不相符合，所以ValueError不会被捕获，直接抛出，结果报出ValueError
+如果range(>1), rows.first抛出ValueError，这与指定的IndexError不相符合，所以ValueError不会被捕获，直接抛出，结果报出ValueError：RecordCollection contains too many rows
+
+（6）raises(SomeClass, rows.first, SomeClass)
+SomeClass是否是Exception的子类
+
+rows = records.RecordCollection(iter([]))
+class Cheese(Exception): pass	
+或者 class Cheese(): pass
+raises(Cheese, rows.first, Cheese)
+
+iter([]和range(0)类似，执行first后会抛出 IndexError，然后判断default，此时default是Cheese类，
+如果Cheese类是Exception的子类，则会raise Cheese，与指定的Cheese相符合，会被raises内部捕获，整个流程结果不会有异常
+如果Cheese类不是Exception的子类，则会return Cheese，也不会抛出任何异常，不会抛出指定的Cheese，那么会报出 buildins.Failed: DID NOT RAISE __main__.Cheese
+
+
+
+
+
+
+
+
+
+def __next__(self):
+        try:
+            nextrow = next(self._rows)		
+            self._all_rows.append(nextrow)
+            return nextrow
+        except StopIteration:
+            self.pending = False
+            raise StopIteration('RecordCollection contains no more rows.')
+
+！！！ _rows 是个Record迭代器，从迭代器中一个个取出Record数据然后 放入 _all_rows 这个列表中
+row_gen = (Record(cursor.keys(), row) for row in cursor)
+results = RecordCollection(row_gen)
+
+
+
+def query(self, query, fetchall=False, **params):
+	# Execute the given query.
+	cursor = self.db.execute(text(query), **params) # TODO: PARAMS GO HERE
+
+	# Row-by-row Record generator.
+	row_gen = (Record(cursor.keys(), row) for row in cursor)
+
+	# Convert psycopg2 results to RecordCollection.
+	results = RecordCollection(row_gen)
+
+	return results
+
+	
+row_gen 是个生成器，可以看做“大爆炸之前的状态”，数据没有展开，只是一个数据计算方式，并不是数据
+但是通过all()，可以促使这个计算方式开始运行，产生一个个的数据，就像“大爆炸开始以后的状态”
+节约内存，不用把所以的数据都计算好存储，只是存储如何产生数据的方式。
+
+
+
+
+@property
+    def dataset(self):
+这个是首先将字段名 作为 header存入 data，然后将一行行数据（只有value，没有key）存入data	
+
+
+	
+
+
+
+刚开始使用 [idx] 的时候，没有展开，所以len(self)是0，肯定小于key.stop（key.stop至少是1，在key为0时）
+此时，会调用 next(self)，直到len满足预设要求为止，此时会取出 [idx] 对应的元素
+
+    def __getitem__(self, key):
+        print('RecordCollection: __getitem__')
+        is_int = isinstance(key, int)
+
+        # Convert RecordCollection[1] into slice.
+        if is_int:
+            key = slice(key, key + 1)
+
+        while len(self) < key.stop or key.stop is None:
+            print('RecordCollection: __getitem__, len(self): ', len(self), 'key.stop: ', key.stop)
+            try:
+                next(self)
+            except StopIteration:
+                break
+
+        rows = self._all_rows[key]
+        if is_int:
+            return rows[0]
+        else:
+            return RecordCollection(iter(rows))
+
+
+
+
